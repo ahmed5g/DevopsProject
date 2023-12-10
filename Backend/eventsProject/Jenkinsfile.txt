@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+    tools {
+        maven "maven"
+    }
+    
+    stages {
+        stage("Build Maven") {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/ahmed5g/DevopsProject.git']]])
+    
+                dir('Backend/eventsProject') {
+                    sh "mvn clean install"
+                }
+            }
+        }
+        stage("Build Docker Image"){
+            steps {
+                dir("Backend/eventsProject"){
+                    sh "docker build -t ahmeddocer/devops-project ."
+                }
+            }
+        }
+        stage("Push image to Dockerhub"){
+            steps {
+                withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                    sh "docker login -u ahmeddocer -p ${dockerhubpwd}"
+                    sh "docker push ahmeddocer/devops-project"
+                } 
+            }
+        }
+        stage("SonarQube Analysis"){
+            steps {
+                script {
+                    def scannerHome = tool 'SonarQube_Scanner'
+                    
+                    withSonarQubeEnv('SONAR_server') {
+                        dir("Backend/eventsProject"){
+                            sh """${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=eventsProject \
+                                -Dsonar.projectName='eventsProject' \
+                                -Dsonar.host.url=http://localhost:9000 \
+                                -Dsonar.sources=src/main/java/tn/esprit/eventsproject/services,src/main/java/tn/esprit/eventsproject/repositories \
+                                -Dsonar.login=sqp_742d8953c02f1f5c837d2c13f290b5243e38e866 \
+                                -Dsonar.java.binaries=target/classes
+                                """
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
