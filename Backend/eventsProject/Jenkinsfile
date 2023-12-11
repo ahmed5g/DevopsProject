@@ -29,6 +29,14 @@ pipeline {
                 } 
             }
         }
+       stage('Running SQL & Backend project Docker-Compose containers') {
+            steps {
+                dir("path/to/your/docker-compose-directory") {
+                    sh "docker-compose -f your-docker-compose-file.yml up -d"
+                    }
+                }
+        }
+
         stage("SonarQube Analysis"){
             steps {
                 script {
