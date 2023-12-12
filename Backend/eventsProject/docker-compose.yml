@@ -4,7 +4,7 @@ services:
   eventProject:
     image: ahmeddocer/devops-project
     ports:
-      - "8080:8080"
+      - "9090:8070"
     volumes:
       - ./target/eventProject.jar:/eventProject.jar
     command: ["java", "-jar", "/eventProject.jar"]
