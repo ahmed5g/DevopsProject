@@ -24,13 +24,15 @@ pipeline {
         }
 
         stage("Verify Tooling"){
-            sh """ docker info
-            mvn -version
-            docker --version
-            docker compose --version
-            jq --version
-            """
+            steps{
+                sh """ docker info
+                    mvn -version
+                    docker --version
+                    docker compose --version
+                    jq --version
+                    """
 
+            }
         }
 
         //Maven Build stage
@@ -43,7 +45,7 @@ pipeline {
                 }
             }
         }
-        //Docker || Docker compose  stages
+        //Docker || Docker compose  tages
         stage("Build Docker Image"){
             steps {
                 dir("Backend/eventsProject"){
@@ -87,7 +89,7 @@ pipeline {
             }
         }
         
-        //Quality code analysis stages
+        //Quality code analysis
         stage("SonarQube Analysis"){
             steps {
                 script {
