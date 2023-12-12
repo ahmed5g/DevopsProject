@@ -4,7 +4,36 @@ pipeline {
         maven "maven"
     }
     
+    //Initial Stages
     stages {
+         stage("Clean Workspace") {
+            steps {
+                cleanWs()
+            }
+        }
+        
+        stage("Prine Docker data"){
+            steps {
+                sh "docker system prune -a --volume -f" 
+            }
+            post {
+                always {
+                    echo "Unused local volumes removed"
+                }
+            }
+        }
+
+        stage("Verify Tooling"){
+            sh """ docker info
+            mvn -version
+            docker --version
+            docker compose --version
+            jq --version
+            """
+
+        }
+
+        //Maven Build stage
         stage("Build Maven") {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/ahmed5g/DevopsProject.git']]])
@@ -14,6 +43,7 @@ pipeline {
                 }
             }
         }
+        //Docker || Docker compose  stages
         stage("Build Docker Image"){
             steps {
                 dir("Backend/eventsProject"){
@@ -35,7 +65,29 @@ pipeline {
                     sh "docker-compose -f docker-compose.yml up -d"
                 }
             }
+            post {
+                success {
+                    echo "Docker Compose started successfully"
+                }
+                failure {
+                    echo "Failed to start Docker Compose"
+                }
+            }
         }
+        stage("Stop Docker Compose"){
+            steps {
+                dir("Backend/eventsProject"){
+                    sh "docker-compose -f docker-compose.yml  down"
+                }
+            }
+            post {
+                always {
+                    echo "Docker Compose services stopped"
+                }
+            }
+        }
+        
+        //Quality code analysis stages
         stage("SonarQube Analysis"){
             steps {
                 script {
