@@ -29,6 +29,13 @@ pipeline {
                 } 
             }
         }
+        stage(){
+            steps{
+                dir("Backend/eventsProject"){
+                    sh "docker-compose -f docker-compose.yml up -d"
+                }
+            }
+        }
         stage("SonarQube Analysis"){
             steps {
                 script {
