@@ -6,13 +6,13 @@ pipeline {
     
     //Initial Stages
     stages {
-         stage("Clean Workspace") {
+        stage("Clean Workspace") {
             steps {
                 cleanWs()
             }
         }
         
-        stage("Prine Docker data"){
+        stage("Prune Docker data"){
             steps {
                 sh "docker system prune -a --volume -f" 
             }
@@ -24,18 +24,20 @@ pipeline {
         }
 
         stage("Verify Tooling"){
-            steps{
-                sh """ docker info
-                    mvn -version
-                    docker --version
-                    docker compose --version
-                    jq --version
-                    """
-
+            steps {
+                script {
+                    sh """ 
+                        docker info
+                        mvn -version
+                        docker --version
+                        docker-compose --version
+                        jq --version
+                        """
+                }
             }
         }
 
-        //Maven Build stage
+        // Maven Build stage
         stage("Build Maven") {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: 'main']], userRemoteConfigs: [[url: 'https://github.com/ahmed5g/DevopsProject.git']]])
@@ -45,7 +47,8 @@ pipeline {
                 }
             }
         }
-        //Docker || Docker compose  tages
+        
+        // Docker || Docker compose stages
         stage("Build Docker Image"){
             steps {
                 dir("Backend/eventsProject"){
@@ -53,6 +56,7 @@ pipeline {
                 }
             }
         }
+        
         stage("Push image to Dockerhub"){
             steps {
                 withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
@@ -61,6 +65,7 @@ pipeline {
                 } 
             }
         }
+        
         stage("Start Docker Compose"){
             steps{
                 dir("Backend/eventsProject"){
@@ -76,10 +81,11 @@ pipeline {
                 }
             }
         }
+        
         stage("Stop Docker Compose"){
             steps {
                 dir("Backend/eventsProject"){
-                    sh "docker-compose -f docker-compose.yml  down"
+                    sh "docker-compose -f docker-compose.yml down"
                 }
             }
             post {
@@ -89,7 +95,7 @@ pipeline {
             }
         }
         
-        //Quality code analysis
+        // Quality code analysis
         stage("SonarQube Analysis"){
             steps {
                 script {
