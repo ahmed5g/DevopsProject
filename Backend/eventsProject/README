@@ -1,0 +1,28 @@
+# EventsProject
+
+This is a Spring Boot project that serves as a basic template for web applications.
+
+## Features
+
+- Authentication using Spring Security
+- CRUD operations on entities using Spring Data JPA
+- RESTful API endpoints
+- Front-end built with Thymeleaf
+
+## Getting Started
+
+To run this project locally, follow these steps:
+
+### Prerequisites
+
+- Java Development Kit (JDK) 11 or higher
+- Maven
+
+### Setup
+
+1. Clone this repository.
+2. Navigate to the project directory.
+3. Run the application using Maven:
+
+   ```bash
+   mvn spring-boot:run
