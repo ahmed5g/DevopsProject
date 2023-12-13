@@ -94,6 +94,24 @@ pipeline {
                 }
             }
         }
+
+        stage("Execute Junit test"){
+            steps {
+                dir("Backend/eventsProject"){
+                    // Ensure Maven has the correct path for running tests
+                    sh "mvn clean test"
+                }
+            }
+            post {
+                success {
+                    echo "JUnit tests executed successfully"
+                }
+                failure {
+                    echo "Failed to execute JUnit tests"
+                }
+            }
+        }
+
         
         // Quality code analysis
         stage("SonarQube Analysis"){
